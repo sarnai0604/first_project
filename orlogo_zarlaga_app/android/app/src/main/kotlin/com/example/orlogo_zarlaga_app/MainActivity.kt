@@ -1,0 +1,5 @@
+package com.example.orlogo_zarlaga_app
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
