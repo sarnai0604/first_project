@@ -1,0 +1,87 @@
+{
+    "intro": {
+        "bio": "¯\\_(ツ)_/¯"
+    },
+    "work": {
+        "data": [
+            {
+                "title": "Work",
+                "values": [
+                    "Work experience"
+                ]
+            }
+        ]
+    },
+    "travel": {
+        "data": [
+            {
+                "title": "Travel",
+                "values": [
+                    "Add up to 450 places you've visited.",
+                    "Places"
+                ]
+            }
+        ]
+    },
+    "links": {
+        "data": [
+            {
+                "title": "Links",
+                "values": [
+                    "Add up to 10 links.",
+                    "Websites, blogs, portfolios"
+                ]
+            }
+        ]
+    },
+    "contact_info": {
+        "data": [
+            {
+                "title": "Social media",
+                "values": [
+                    "sarnai4744",
+                    "Instagram"
+                ]
+            },
+            {
+                "title": "Phone",
+                "values": [
+                    "9955 5513",
+                    "Mobile"
+                ]
+            },
+            {
+                "title": "Email",
+                "values": [
+                    "burmaa.sarnai777@gmail.com"
+                ]
+            }
+        ]
+    },
+    "names": {
+        "data": [
+            {
+                "title": "Other names",
+                "values": [
+                    "Add other names"
+                ]
+            }
+        ]
+    },
+    "aboutyou": {
+        "data": [
+            {
+                "title": "About you",
+                "values": [
+                    "Write some details about yourself"
+                ]
+            },
+            {
+                "title": "Favorite quotes",
+                "values": [
+                    "Add your favorite quotations"
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FB ID Lookup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; padding: 30px 16px; }
+  .card { background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 1250px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); text-align: center; height: fit-content; }
+  .logo { color: #1877f2; font-size: 26px; font-weight: bold; margin-bottom: 6px; }
+  .sub { color: #888; margin-bottom: 20px; font-size: 13px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; background: white; color: #888; }
+  .tab.active { border-color: #1877f2; color: #1877f2; background: #f0f6ff; }
+  input { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; outline: none; }
+  input:focus { border-color: #1877f2; }
+  textarea { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 13px; outline: none; resize: vertical; min-height: 120px; font-family: monospace; }
+  textarea:focus { border-color: #1877f2; }
+  .main-btn { width: 100%; margin-top: 10px; padding: 13px; background: #1877f2; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .main-btn:hover { background: #1565c0; }
+  .main-btn:disabled { background: #b0c4e8; cursor: not-allowed; }
+
+  .result-grid { display: none; margin-top: 16px; border: 2px solid #e8f0fe; border-radius: 12px; overflow: hidden; }
+  .result-grid table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .result-grid th { background: #1877f2; color: white; padding: 10px 14px; text-align: left; font-weight: 600; width: 35%; }
+  .result-grid td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; text-align: left; font-weight: 500; color: #222; }
+  .result-grid tr:last-child td { border-bottom: none; }
+  .result-grid tr.clickable:hover td { background: #f0f6ff; cursor: pointer; }
+  .empty-td { color: #bbb; font-weight: 400; }
+  .tag { display: inline-block; font-size: 11px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+
+  .bulk-results { margin-top: 16px; text-align: left; display: none; overflow-x: auto; }
+  .bulk-results table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+  .bulk-results th { background: #1877f2; color: white; padding: 9px 10px; text-align: left; font-weight: 600; }
+  .bulk-results td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .bulk-results tr:hover td { background: #f9f9f9; }
+
+  .found        { color: #2e7d32; font-weight: 600; }
+  .notfound     { color: #bbb; }
+  .is-locked    { color: #d32f2f; font-weight: bold; }
+  .is-not-locked { color: #2e7d32; font-weight: 500; }
+  .gender-male   { color: #1565c0; font-weight: 600; }
+  .gender-female { color: #c2185b; font-weight: 600; }
+  .gender-unknown { color: #999; font-weight: 400; }
+  .location-val  { color: #555; font-weight: 500; }
+
+  .progress { margin-top: 10px; font-size: 13px; color: #888; display: none; }
+  .col-copy { display: inline-block; margin-left: 6px; font-size: 10px; color: #fff; cursor: pointer; font-weight: 400; border: 1px solid rgba(255,255,255,0.6); border-radius: 4px; padding: 1px 5px; user-select: none; opacity: 0.85; }
+  .col-copy:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+  .copy-all { margin-bottom: 10px; padding: 8px; background: #f0f6ff; color: #1877f2; border: 1px solid #1877f2; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
+  .copy-all:hover { background: #ddeeff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">FB ID Lookup</div>
+  <div class="sub">Username → ID &nbsp;·&nbsp; ID → Username</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this, 'single')">Нэг хайлт</button>
+    <button class="tab" onclick="switchTab(this, 'bulk')">Олон хайлт</button>
+  </div>
+
+  <!-- SINGLE -->
+  <div id="single-panel">
+    <input id="inp" placeholder="Username эсвэл тоон ID..." autofocus />
+    <button class="main-btn" id="btn" onclick="searchSingle()">Хайх</button>
+    <div class="result-grid" id="result-grid">
+      <table><tbody id="result-tbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- BULK -->
+  <div id="bulk-panel" style="display:none">
+    <textarea id="bulk-inp" placeholder="Нэг мөрт нэг утга&#10;e.sarangua.350041&#10;100030016260618&#10;..."></textarea>
+    <button class="main-btn" id="bulk-btn" onclick="searchBulk()">Хайх</button>
+    <div class="progress" id="progress"></div>
+    <div class="bulk-results" id="bulk-results">
+      <button class="copy-all" onclick="copyAll(this)">Бүх үр дүнг хуулах</button>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Оруулсан</th>
+            <th>Username <span class="col-copy" onclick="copyCol('username',this)">copy</span></th>
+            <th>ID <span class="col-copy" onclick="copyCol('id',this)">copy</span></th>
+            <th>Friends <span class="col-copy" onclick="copyCol('friends',this)">copy</span></th>
+            <th>Followers <span class="col-copy" onclick="copyCol('followers',this)">copy</span></th>
+            <th>Following <span class="col-copy" onclick="copyCol('following',this)">copy</span></th>
+            <th>Locked <span class="col-copy" onclick="copyCol('is_closed',this)">copy</span></th>
+            <th>Gender <span class="col-copy" onclick="copyCol('gender',this)">copy</span></th>
+            <th>Lives In <span class="col-copy" onclick="copyCol('lives_in',this)">copy</span></th>
+            <th>From <span class="col-copy" onclick="copyCol('from_place',this)">copy</span></th>
+            <th>Birthdate <span class="col-copy" onclick="copyCol('birthdate',this)">copy</span></th>
+            <th>Status <span class="col-copy" onclick="copyCol('status',this)">copy</span></th>
+            <th>Category <span class="col-copy" onclick="copyCol('category',this)">copy</span></th>
+          </tr>
+        </thead>
+        <tbody id="bulk-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('inp').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') searchSingle();
+});
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('single-panel').style.display = (tab === 'single') ? 'block' : 'none';
+  document.getElementById('bulk-panel').style.display   = (tab === 'bulk')   ? 'block' : 'none';
+}
+
+function _copyFallback(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;opacity:0.01;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, 99999);
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).catch(function() { _copyFallback(text); });
+  } else {
+    _copyFallback(text);
+  }
+}
+
+function hasValue(v) {
+  return v && v !== '0' && v !== 'Олдсонгүй';
+}
+
+function genderClass(g) {
+  if (g === 'male')   return 'gender-male';
+  if (g === 'female') return 'gender-female';
+  return 'gender-unknown';
+}
+
+// ── SINGLE ────────────────────────────────────────────────────
+function searchSingle() {
+  var val = document.getElementById('inp').value.trim();
+  if (!val) return;
+  var btn = document.getElementById('btn');
+  btn.disabled = true;
+  btn.textContent = 'Хайж байна...';
+  document.getElementById('result-grid').style.display = 'none';
+
+  fetch('/lookup?q=' + encodeURIComponent(val))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var d = data.result || {};
+      var byId = /^\d+$/.test(val);
+
+      var rows = [];
+      if (byId) {
+        rows.push({ label: 'Username', value: d.username });
+      } else {
+        rows.push({ label: 'User ID',  value: d.id });
+      }
+      rows.push({ label: 'Friends',        value: d.friends });
+      rows.push({ label: 'Followers',      value: d.followers });
+      rows.push({ label: 'Following',      value: d.following });
+      rows.push({ label: 'Locked Profile', value: d.is_closed === 'locked' ? 'Тийм (Түгжээтэй)' : 'Үгүй (Open)', isLockedField: true, isTrue: d.is_closed === 'locked' });
+      rows.push({ label: 'Gender',         value: d.gender || 'unknown', isGenderField: true });
+      rows.push({ label: 'Lives In',       value: d.lives_in || '' });
+      rows.push({ label: 'From',           value: d.from_place || '' });
+
+      var tbody = document.getElementById('result-tbody');
+      tbody.innerHTML = '';
+
+      rows.forEach(function(row) {
+        var tr = document.createElement('tr');
+        var th = document.createElement('th');
+        th.textContent = row.label;
+        var td = document.createElement('td');
+
+        if (row.isLockedField) {
+          td.textContent = row.value;
+          td.className = row.isTrue ? 'is-locked' : 'is-not-locked';
+        } else if (row.isGenderField) {
+          td.textContent = row.value;
+          td.className = genderClass(row.value);
+        } else {
+          var ok = hasValue(row.value);
+          if (ok) {
+            td.textContent = row.value;
+            tr.className = 'clickable';
+            var tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = 'хуулах';
+            td.appendChild(tag);
+            tr.addEventListener('click', (function(v, tg) {
+              return function() {
+                copyText(v);
+                tg.textContent = '✓ хуулагдлаа';
+                setTimeout(function() { tg.textContent = 'хуулах'; }, 1400);
+              };
+            })(row.value, tag));
+          } else {
+            td.textContent = '—';
+            td.className = 'empty-td';
+          }
+        }
+
+        tr.appendChild(th);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('result-grid').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Хайх';
+    })
+    .catch(function(err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.textContent = 'Хайх';
+    });
+}
+
+// ── BULK ──────────────────────────────────────────────────────
+var bulkResults = [];
+
+function searchBulk() {
+  var raw   = document.getElementById('bulk-inp').value;
+  var lines = raw.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+  if (!lines.length) return;
+
+  var btn = document.getElementById('bulk-btn');
+  btn.disabled = true;
+  bulkResults  = [];
+  document.getElementById('bulk-tbody').innerHTML = '';
+  document.getElementById('bulk-results').style.display = 'block';
+
+  var prog = document.getElementById('progress');
+  prog.style.display = 'block';
+  prog.textContent   = lines.length + ' хайлт илгээж байна...';
+
+  fetch('/batch', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ items: lines })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var results = data.results || [];
+    var tbody   = document.getElementById('bulk-tbody');
+
+    for (var i = 0; i < lines.length; i++) {
+      var r          = results[i] || {};
+      var isClosedVal = r.is_closed  || '';
+      var genderVal   = r.gender     || '';
+      var livesInVal  = r.lives_in   || '';
+      var fromVal     = r.from_place || '';
+
+      bulkResults.push({
+        q:          lines[i],
+        username:   r.username   || '',
+        id:         r.id         || '',
+        friends:    r.friends    || '',
+        followers:  r.followers  || '',
+        following:  r.following  || '',
+        is_closed:  isClosedVal,
+        gender:     genderVal,
+        lives_in:   livesInVal,
+        from_place: fromVal,
+        birthdate:  r.birthdate  || '',
+        status:     r.status || '',
+        category:   r.category || ''
+      });
+
+      var tr    = document.createElement('tr');
+      var cells = [
+        { v: String(i + 1),  style: 'color:#aaa;font-size:11px' },
+        { v: lines[i],       style: 'color:#555' },
+        { v: r.username  || '', cls: hasValue(r.username)  ? 'found' : 'notfound' },
+        { v: r.id        || '', cls: hasValue(r.id)        ? 'found' : 'notfound' },
+        { v: r.friends   || '', cls: hasValue(r.friends)   ? 'found' : 'notfound' },
+        { v: r.followers || '', cls: hasValue(r.followers) ? 'found' : 'notfound' },
+        { v: r.following || '', cls: hasValue(r.following) ? 'found' : 'notfound' },
+        { v: isClosedVal,       cls: isClosedVal === 'locked' ? 'is-locked' : (isClosedVal === 'open' ? 'is-not-locked' : 'notfound') },
+        { v: genderVal,         cls: genderClass(genderVal) },
+        { v: livesInVal,        cls: hasValue(livesInVal) ? 'location-val' : 'notfound' },
+        { v: fromVal,           cls: hasValue(fromVal) ? 'location-val' : 'notfound' },
+        { v: r.birthdate || '', cls: hasValue(r.birthdate) ? 'found' : 'notfound' },
+        { v: r.status || '',    cls: hasValue(r.status) ? 'found' : 'notfound' },
+        { v: r.category || '',  cls: hasValue(r.category) ? 'found' : 'notfound' }
+        
+      ];
+
+      cells.forEach(function(c) {
+        var td = document.createElement('td');
+        td.textContent = c.v || '—';
+        if (c.style) td.setAttribute('style', c.style);
+        if (c.cls)   td.className = c.cls;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    }
+
+    prog.textContent = '✓ Дууслаа! ' + lines.length + ' хайлт хийлээ.';
+    btn.disabled = false;
+  })
+  .catch(function(err) {
+    console.error(err);
+    prog.textContent = 'Алдаа гарлаа.';
+    btn.disabled = false;
+  });
+}
+
+function copyCol(key, el) {
+  var text = bulkResults.map(function(x) { return x[key] || ''; }).join('\n');
+  copyText(text);
+  el.textContent = 'paste';
+  setTimeout(function() { el.textContent = 'copy'; }, 1500);
+}
+
+function copyAll(btn) {
+  var text = bulkResults.map(function(x) {
+    return [x.username, x.id, x.friends, x.followers, x.following, x.is_closed, x.gender, x.lives_in, x.from_place].join('\t');
+  }).join('\n');
+  copyText(text);
+  var orig = btn.textContent;
+  btn.textContent = 'Хуулагдлаа!';
+  setTimeout(function() { btn.textContent = orig; }, 1500);
+}
+</script>
+</body>
+</html>
