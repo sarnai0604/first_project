@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Executable files
+*.exe
+*.pkg
+
+# Generated Facebook HTML
+excel/facebook_*.html
