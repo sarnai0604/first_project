@@ -1,0 +1,66 @@
+import pandas as pd
+
+# Define the columns as requested
+columns = [
+    "ID", "username", "friends", "followers", "following", "likes", 
+    "is_closed", "bio", "category", "location", "hometown", 
+    "birthday", "status", "family_members", "gender", "work", 
+    "education", "links", "social_media", "phone", "email"
+]
+
+# Create a sample HTML UI that displays data in a table and provides a 'Copy All' functionality.
+html_content = """
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <title>Facebook Profile Data Extractor</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .controls { margin-bottom: 20px; }
+        button { padding: 10px 20px; background-color: #008CBA; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #007bb5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Facebook Profile Data</h2>
+    <div class="controls">
+        <button onclick="copyTable()">Copy All to Clipboard</button>
+    </div>
+    <table id="profileTable">
+        <thead>
+            <tr>
+                """ + "".join([f"<th>{col}</th>" for col in columns]) + """
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+function copyTable() {
+    const table = document.getElementById("profileTable");
+    let range = document.createRange();
+    range.selectNode(table);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    alert("Хүснэгтийг хууллаа! Excel-д Paste хийхэд бэлэн.");
+}
+</script>
+
+</body>
+</html>
+"""
+
+with open("profile_data_ui.html", "w", encoding="utf-8") as f:
+    f.write(html_content)

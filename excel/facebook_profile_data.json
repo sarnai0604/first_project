@@ -1,85 +1,35 @@
 {
+    "stats": {
+        "is_closed": "open",
+        "followers": "248K",
+        "following": "6"
+    },
+    "category": {
+        "data": [
+            {
+                "title": "Category",
+                "values": [
+                    "Digital creator"
+                ]
+            }
+        ]
+    },
+    "personal_details": {
+        "data": [
+            {
+                "title": "Birthday",
+                "values": [
+                    "July 22, 1999"
+                ]
+            }
+        ]
+    },
     "intro": {
-        "bio": "¯\\_(ツ)_/¯"
-    },
-    "work": {
         "data": [
             {
-                "title": "Work",
+                "title": "Bio",
                 "values": [
-                    "Work experience"
-                ]
-            }
-        ]
-    },
-    "travel": {
-        "data": [
-            {
-                "title": "Travel",
-                "values": [
-                    "Add up to 450 places you've visited.",
-                    "Places"
-                ]
-            }
-        ]
-    },
-    "links": {
-        "data": [
-            {
-                "title": "Links",
-                "values": [
-                    "Add up to 10 links.",
-                    "Websites, blogs, portfolios"
-                ]
-            }
-        ]
-    },
-    "contact_info": {
-        "data": [
-            {
-                "title": "Social media",
-                "values": [
-                    "sarnai4744",
-                    "Instagram"
-                ]
-            },
-            {
-                "title": "Phone",
-                "values": [
-                    "9955 5513",
-                    "Mobile"
-                ]
-            },
-            {
-                "title": "Email",
-                "values": [
-                    "burmaa.sarnai777@gmail.com"
-                ]
-            }
-        ]
-    },
-    "names": {
-        "data": [
-            {
-                "title": "Other names",
-                "values": [
-                    "Add other names"
-                ]
-            }
-        ]
-    },
-    "aboutyou": {
-        "data": [
-            {
-                "title": "About you",
-                "values": [
-                    "Write some details about yourself"
-                ]
-            },
-            {
-                "title": "Favorite quotes",
-                "values": [
-                    "Add your favorite quotations"
+                    "𝑪𝑯𝑬𝑹𝑹𝒀 𝑺𝑰𝑵 𝑳𝑼𝑿𝑬 𝑩𝑹𝑨𝑵𝑫"
                 ]
             }
         ]
