@@ -13,9 +13,10 @@ COOKIE_STRING = """
     datr=0f4TaniQolJ5C4YoG81CwSqZ;
     sb=0f4Tag_szj9t082e8Bc6butW;
     c_user=100021418158790;
-    xs=8%3AwLNtoHNhRy9koA%3A2%3A1787020295%3A-1%3A-1%3A%3AAcxRulgHOS7-j-EXIPnB92XOMvEYaSjDMeaYvOW3eJE;
-    fr=1TR1Zvw8sv0Ruknai.AWemjNpwC0f03V_ZckSoPWpFJbF_HylsudO1Ce8wElkLW-xOqXs.BqhVuw..AAA.0.0.BqhWY1.AWdojhn6aR8WDdDGMCUw_WHKuvA;
+    xs=11%3AQxOKLVnuyO3D6A%3A2%3A1787194304%3A-1%3A-1%3A%3AAcyiztEM_eGN8KNaI_q6Z9sxLV5avvnLwj8OgdOomQ;
+    fr=1UKtHbKEv0MIH61kG.AWfJJpcuST_BlPO_PrUiGw4fXUICXNdN7jV-uOgo7QJ7plVWtzc.BqhmvG..AAA.0.0.BqhmvG.AWfIeTsQ1mcKegYbCfy_NPIikN0;
 """
+
 
 def parse_cookies(cookie_string, domain=".facebook.com"):
     cookies = []

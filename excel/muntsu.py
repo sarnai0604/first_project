@@ -6,10 +6,8 @@ import re, time, itertools, threading
 app = Flask(__name__)
 
 COOKIES = [
-    'datr=hqKFaDtm82hAyDfuetyPIalb; sb=hqKFaCbuioK4kXA8wTjsfZFf; ps_l=1; ps_n=1; c_user=61590423134185; oo=v1%7C3%3A1781506156; xs=22%3A-JQwJ5Vtdr2Uzg%3A2%3A1781506154%3A-1%3A-1%3A%3AAcwXoqeov6llrq9RMRR9NGWGvpcff93CSy7YxELM7A; wd=150x739; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781506162009%2C%22v%22%3A1%7D',
-    'datr=hqKFaDtm82hAyDfuetyPIalb; sb=hqKFaCbuioK4kXA8wTjsfZFf; ps_l=1; ps_n=1; oo=v1; c_user=61590727440595; xs=29%3AX0EwSnbQOCaKsA%3A2%3A1781505977%3A-1%3A-1%3A%3AAczjaZ740af9uXEmJwO_LxCvrTPmd_ex9kxQqueQBw; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781505982641%2C%22v%22%3A1%7D; wd=150x739; fr=1mmcC2R87b3qrazNe.AWc5G0-IOSvbbncABQLDY5zFjrO1O-EyYFM766cFCQXN5Bcde-0.BqL5-8..AAA.0.0.BqL5_F.AWcgmXLyNM2KbBr4Ooia40Xi_18',
-    'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100021418158790; xs=23%3AwFJABj_vU7RCKw%3A2%3A1779695328%3A-1%3A-1%3A%3AAcy9GiVlisEoz9oluJq_cPViIpp3m57DIABrmF_GP94; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781233195055%2C%22v%22%3A1%7D; wd=150x828; fr=1ySmBbI4Yg99LH2FS.AWf196ghAANvuHHNqEa17HldXXxgJzHzBQI2PwWFgwTA6WcmSK8.BqK3S3..AAA.0.0.BqK3YR.AWcaUMtM8qq4wCETmNWE_blMXVc',
-    ]
+    'datr=wKZxasZ8H2EYPmRcUZZ6jNUl; sb=nqRyaoOHiizb_L44rJuYB99H; ps_l=1; ps_n=1; c_user=61593179188492; xs=20%3AGFxhX5ft21_thw%3A2%3A1786330706%3A-1%3A-1%3A%3AAcyOzgXqX5gRu0tP1rBQiaiFnPySRrCeL4TGtce6ejI; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1787717449345%2C%22v%22%3A1%7D',
+   ]
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 _cycle = itertools.cycle(COOKIES)

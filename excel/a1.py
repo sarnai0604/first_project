@@ -8,42 +8,22 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
-COOKIES = [
-    'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100021418158790; '
-    'xs=8%3AwLNtoHNhRy9koA%3A2%3A1787020295%3A-1%3A-1%3A%3AAcwuSnf3GoEEYqutlbGTXgaBTg-5CvOG_pWwifqOBNQ; '
-    'presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1787043135775%2C%22v%22%3A1%7D; '
-    'wd=907x794; '
-    'fr=1WXSLK63k6pa4Wrq5.AWeTJIsENS-9yIDEliqLW64m9tm8sC36CqhGRq6_udOWvUZBEww.BqhB1A..AAA.0.0.BqhB1A.AWfvUwBJCGfxPAoHWm5ut9WgdV4;',
-    # 'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100090316622127; xs=19%3A7GZqlgVSWlAVgg%3A2%3A1781749946%3A-1%3A-1%3A%3AAcyqGZgPH5_4w-1syVQ29v-Vpi7xwHGS1xjoAzO0ag; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781749955177%2C%22v%22%3A1%7D; wd=290x794; fr=1SQ473Wh6QOGVDpX7.AWfaprKTtl9ibJptSXEXbFwzAmL0UWdyDXqWLHAtIUi-zKZ7GDE.BqM1jB..AAA.0.0.BqM1jG.AWc3mOQBXiNawT_JaozG5lCrK2Q;'
-]
+COOKIE = 'datr=wKZxasZ8H2EYPmRcUZZ6jNUl; sb=nqRyaoOHiizb_L44rJuYB99H; ps_l=1; ps_n=1; c_user=61593179188492; xs=20%3AGFxhX5ft21_thw%3A2%3A1786330706%3A-1%3A-1%3A%3AAcyOzgXqX5gRu0tP1rBQiaiFnPySRrCeL4TGtce6ejI; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1787717449345%2C%22v%22%3A1%7D'
+   
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-_cycle = itertools.cycle(COOKIES)
-_cookie_lock = threading.Lock()
 
-# ── Session pool ──────────────────────────────────────────────
-_session_pool: list = []
-_session_lock = threading.Lock()
-
-def _new_session():
-    return cf_requests.Session(impersonate='chrome120')
-
-def get_session():
-    with _session_lock:
-        if _session_pool:
-            return _session_pool.pop()
-    return _new_session()
-
-def release_session(s):
-    with _session_lock:
-        _session_pool.append(s)
+SESSION = cf_requests.Session(
+    impersonate='chrome120'
+)
 
 # ── Cookie rotate ─────────────────────────────────────────────
 def get_headers():
-    with _cookie_lock:
-        cookie = next(_cycle)
-    return {'User-Agent': USER_AGENT, 'Cookie': cookie}
+    return {
+        'User-Agent': USER_AGENT,
+        'Cookie': COOKIE
+    }
 
 # ── Location extract (Lives in & From) ────────────────────────
 def _extract_locations(html):
@@ -67,29 +47,7 @@ def _extract_locations(html):
     return lives_in, from_place
 
 
-# ── Birthdate extract ─────────────────────────────────────────
-def extract_birthdate(html):
-    date_pattern = (
-        r'(January|February|March|April|May|June|July|August|'
-        r'September|October|November|December)\s+\d{1,2},\s+\d{4}'
-    )
 
-    try:
-        m = re.search(
-            date_pattern,
-            html,
-            re.IGNORECASE
-        )
-
-        if m:
-            return m.group(0).strip()
-
-    except Exception as e:
-        print("Birthdate error:", e)
-
-    return ''
-
-# ── Relationship Status extract ───────────────────────────────
 # ── Relationship Status extract ───────────────────────────────
 def _extract_status(html):
     # Facebook relationship status нь ихэвчлэн:
@@ -154,7 +112,6 @@ def do_lookup(q):
         "is_closed": "", 
         "lives_in": "", 
         "from_place": "",
-        "birthdate": "",
         "status": "",
         "category": ""
     }
@@ -163,10 +120,9 @@ def do_lookup(q):
     if not q.isdigit():
         return empty_res
 
-    session = get_session()
     try:
         headers = get_headers()
-        resp = session.get(
+        resp = SESSION.get(
             f'https://www.facebook.com/{q}',
             headers=headers,
             timeout=10,
@@ -236,7 +192,6 @@ def do_lookup(q):
         # ── Lives in & From ───────────────────────────────
         lives_in, from_place = _extract_locations(html_content)
 
-        birthdate = extract_birthdate(html_content)
 
         return {
             "username":   slug,
@@ -248,7 +203,6 @@ def do_lookup(q):
             "is_closed":  is_closed,
             "lives_in":   lives_in,
             "from_place": from_place,
-            "birthdate":  birthdate,
             "status":       _extract_status(html_content),
             "category":     _extract_category(html_content)
         }
@@ -256,8 +210,6 @@ def do_lookup(q):
     except Exception as e:
         print("LOOKUP ERROR:", e)
         return empty_res
-    finally:
-        release_session(session)
 
 # ── Routes ────────────────────────────────────────────────────
 @app.route('/')
@@ -288,4 +240,19 @@ def lookup():
 
 if __name__ == '__main__':
     os.makedirs('static', exist_ok=True)
-    app.run(host='0.0.0.0', port=8080, debug=True, threaded=True)
+
+    try:
+        app.run(
+            host='0.0.0.0',
+            port=8080,
+            debug=False,
+            threaded=True
+        )
+
+    except KeyboardInterrupt:
+        print("\nStopping server...")
+
+    finally:
+        print("Closing Facebook session...")
+        SESSION.close()
+        print("Session closed.")

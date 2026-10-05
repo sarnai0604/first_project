@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FB ID Lookup - Bulk</title>
+<title>FB ID & Username Converter</title>
 
 <style>
   * {
@@ -26,7 +26,7 @@
     border-radius: 16px;
     padding: 32px;
     width: 100%;
-    max-width: 1350px;
+    max-width: 650px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.1);
     text-align: center;
     height: fit-content;
@@ -53,7 +53,7 @@
     font-size: 13px;
     outline: none;
     resize: vertical;
-    min-height: 180px;
+    min-height: 150px;
     font-family: monospace;
   }
 
@@ -101,19 +101,18 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
-    white-space: nowrap;
   }
 
   .bulk-results th {
     background: #1877f2;
     color: white;
-    padding: 9px 10px;
+    padding: 10px;
     text-align: left;
     font-weight: 600;
   }
 
   .bulk-results td {
-    padding: 8px 10px;
+    padding: 10px;
     border-bottom: 1px solid #f0f0f0;
     vertical-align: middle;
   }
@@ -129,36 +128,6 @@
 
   .notfound {
     color: #bbb;
-  }
-
-  .is-locked {
-    color: #d32f2f;
-    font-weight: bold;
-  }
-
-  .is-not-locked {
-    color: #2e7d32;
-    font-weight: 500;
-  }
-
-  .gender-male {
-    color: #1565c0;
-    font-weight: 600;
-  }
-
-  .gender-female {
-    color: #c2185b;
-    font-weight: 600;
-  }
-
-  .gender-unknown {
-    color: #999;
-    font-weight: 400;
-  }
-
-  .location-val {
-    color: #555;
-    font-weight: 500;
   }
 
   .col-copy {
@@ -203,28 +172,23 @@
 
 <div class="card">
 
-  <div class="logo">FB ID Lookup</div>
+  <div class="logo">ID & Username Converter</div>
 
-  <div class="sub">
-    Username / ID → мэдээлэл хайх
-  </div>
-
-  <!-- BULK SEARCH -->
   <div id="bulk-panel">
 
     <textarea
       id="bulk-inp"
-      placeholder="Нэг мөрт нэг утга
-zukotoji09
-SpiderManMovieAUS
+      placeholder="Нэг мөрт нэг утга (Username эсвэл ID)
+zuck
 100003645830763
+mark.zuckerberg
 ..."></textarea>
 
     <button
       class="main-btn"
       id="bulk-btn"
       onclick="searchBulk()">
-      Хайх
+      Хөрвүүлэх
     </button>
 
     <div
@@ -239,81 +203,31 @@ SpiderManMovieAUS
       <button
         class="copy-all"
         onclick="copyAll(this)">
-        Бүх үр дүнг хуулах (Excel-д зориулсан)
+        Бүх үр дүнг хуулах
       </button>
 
       <table>
-
         <thead>
           <tr>
             <th>#</th>
-
+            <th>Хайсан утга</th>
             <th>
-              ID
+              UserID
               <span class="col-copy" onclick="copyCol('id',this)">copy</span>
             </th>
-
             <th>
               Username
               <span class="col-copy" onclick="copyCol('username',this)">copy</span>
             </th>
-
-            <th>
-              Display Name
-              <span class="col-copy" onclick="copyCol('display_name',this)">copy</span>
-            </th>
-
-            <th>
-              Friends
-              <span class="col-copy" onclick="copyCol('friends',this)">copy</span>
-            </th>
-
-            <th>
-              Followers
-              <span class="col-copy" onclick="copyCol('followers',this)">copy</span>
-            </th>
-
-            <th>
-              Following
-              <span class="col-copy" onclick="copyCol('following',this)">copy</span>
-            </th>
-
-            <th>
-              Locked
-              <span class="col-copy" onclick="copyCol('is_closed',this)">copy</span>
-            </th>
-
-            <th>
-              Gender
-              <span class="col-copy" onclick="copyCol('gender',this)">copy</span>
-            </th>
-
-            <th>
-              Lives In
-              <span class="col-copy" onclick="copyCol('lives_in',this)">copy</span>
-            </th>
-
-            <th>
-              From
-              <span class="col-copy" onclick="copyCol('from_place',this)">copy</span>
-            </th>
-
-            <th>
-              Category
-              <span class="col-copy" onclick="copyCol('category',this)">copy</span>
-            </th>
           </tr>
         </thead>
-
         <tbody id="bulk-tbody"></tbody>
-
       </table>
     </div>
 
   </div>
 
 </div>
-
 
 <script>
 
@@ -339,12 +253,6 @@ function copyText(text) {
 
 function hasValue(v) {
   return v && v !== '0' && v !== 'Олдсонгүй';
-}
-
-function genderClass(g) {
-  if (g === 'male') return 'gender-male';
-  if (g === 'female') return 'gender-female';
-  return 'gender-unknown';
 }
 
 var bulkResults = [];
@@ -379,44 +287,20 @@ function searchBulk() {
 
     for (var i = 0; i < lines.length; i++) {
       var r = results[i] || {};
-      var isClosedVal = r.is_closed || '';
-      var genderVal = r.gender || '';
-      var livesInVal = r.lives_in || '';
-      var fromVal = r.from_place || '';
-      var displayNameVal = r.display_name || '';
-      var categoryVal = r.category || '';
-      var idVal = r.id || lines[i];
-      var usernameVal = r.username || '';
 
       bulkResults.push({
-        id: idVal,
-        username: usernameVal,
-        display_name: displayNameVal,
-        friends: r.friends || '',
-        followers: r.followers || '',
-        following: r.following || '',
-        is_closed: isClosedVal,
-        gender: genderVal,
-        lives_in: livesInVal,
-        from_place: fromVal,
-        category: categoryVal
+        query: lines[i],
+        id: r.id || '',
+        username: r.username || ''
       });
 
       var tr = document.createElement('tr');
 
       var cells = [
         { v: String(i + 1), style: 'color:#aaa;font-size:11px' },
-        { v: idVal, style: 'color:#555' },
-        { v: usernameVal, cls: hasValue(usernameVal) ? 'found' : 'notfound' },
-        { v: displayNameVal, cls: hasValue(displayNameVal) ? 'found' : 'notfound' },
-        { v: r.friends || '', cls: hasValue(r.friends) ? 'found' : 'notfound' },
-        { v: r.followers || '', cls: hasValue(r.followers) ? 'found' : 'notfound' },
-        { v: r.following || '', cls: hasValue(r.following) ? 'found' : 'notfound' },
-        { v: isClosedVal, cls: isClosedVal === 'locked' ? 'is-locked' : (isClosedVal === 'open' ? 'is-not-locked' : 'notfound') },
-        { v: genderVal, cls: genderClass(genderVal) },
-        { v: livesInVal, cls: hasValue(livesInVal) ? 'location-val' : 'notfound' },
-        { v: fromVal, cls: hasValue(fromVal) ? 'location-val' : 'notfound' },
-        { v: categoryVal, cls: hasValue(categoryVal) ? 'found' : 'notfound' }
+        { v: lines[i], style: 'color:#555' },
+        { v: r.id || '', cls: hasValue(r.id) ? 'found' : 'notfound' },
+        { v: r.username || '', cls: hasValue(r.username) ? 'found' : 'notfound' }
       ];
 
       cells.forEach(function(c) {
@@ -430,47 +314,34 @@ function searchBulk() {
       tbody.appendChild(tr);
     }
 
-    prog.textContent = '✓ Дууслаа! ' + lines.length + ' хайлт хийлээ.';
+    prog.textContent = '✓ Дууслаа! ' + lines.length + ' амжилттай хөрвүүллээ.';
     btn.disabled = false;
-    btn.textContent = 'Хайх';
+    btn.textContent = 'Хөрвүүлэх';
   })
   .catch(function(err) {
     console.error(err);
     prog.textContent = 'Алдаа гарлаа.';
     btn.disabled = false;
-    btn.textContent = 'Хайх';
+    btn.textContent = 'Хөрвүүлэх';
   });
 }
 
 function copyCol(key, el) {
   var text = bulkResults.map(function(x) { return x[key] || ''; }).join('\n');
   copyText(text);
-  el.textContent = 'paste';
+  el.textContent = 'copied';
   setTimeout(function() { el.textContent = 'copy'; }, 1500);
 }
 
 function copyAll(btn) {
   var text = bulkResults.map(function(x) {
-    return [
-      x.id,
-      x.username,
-      x.display_name,
-      x.friends,
-      x.followers,
-      x.following,
-      x.is_closed,
-      x.gender,
-      x.lives_in,
-      x.from_place,
-      x.category
-    ].join('\t');
+    return [x.id, x.username].join('\t');
   }).join('\n');
 
   copyText(text);
-
   var orig = btn.textContent;
-  btn.textContent = 'Хуулагдлаа! (Excel руу шууд Paste хийж болно)';
-  setTimeout(function() { btn.textContent = orig; }, 2000);
+  btn.textContent = 'Хуулагдлаа!';
+  setTimeout(function() { btn.textContent = orig; }, 1500);
 }
 
 </script>

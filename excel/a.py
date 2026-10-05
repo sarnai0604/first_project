@@ -9,8 +9,11 @@ import os
 app = Flask(__name__, static_folder='static')
 
 COOKIES = [
-    'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100021418158790; xs=27%3A6-dgPTNn8bBmoA%3A2%3A1781750081%3A-1%3A-1%3A%3AAcy5MgsosQRJGoVvTvfMoZOJ0RUrvQ2murqkyd_HxA; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781682787314%2C%22v%22%3A1%7D; wd=290x794; fr=1ru5yWIlMHC1QBPo8.AWcc00Yx82PLRopluxlIav7yEpEUC8cke_IVdfNMxgolEgx3a54.BqM1lD..AAA.0.0.BqM1s0.AWcSKLu0NBVJqi83l-G_av2Bi9Y;',
-    # 'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100090316622127; xs=19%3A7GZqlgVSWlAVgg%3A2%3A1781749946%3A-1%3A-1%3A%3AAcyqGZgPH5_4w-1syVQ29v-Vpi7xwHGS1xjoAzO0ag; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781749955177%2C%22v%22%3A1%7D; wd=290x794; fr=1SQ473Wh6QOGVDpX7.AWfaprKTtl9ibJptSXEXbFwzAmL0UWdyDXqWLHAtIUi-zKZ7GDE.BqM1jB..AAA.0.0.BqM1jG.AWc3mOQBXiNawT_JaozG5lCrK2Q;'
+    'datr=wKZxasZ8H2EYPmRcUZZ6jNUl; ps_l=1; ps_n=1; c_user=61593179188492; '
+    'xs=20%3AGFxhX5ft21_thw%3A2%3A1786330706%3A-1%3A-1%3A%3AAcyOzgXqX5gRu0tP1rBQiaiFnPySRrCeL4TGtce6ejI; '
+    'presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1787717449345%2C%22v%22%3A1%7D; '
+    'wd=419x826; '
+    'fr=1AKv9OvBiaWJWsGtO.AWducBjEiIDvmVR3g8E2vU6EXED8_qzaAWKmWinOvZEX61F0pSA.BqjmdJ..AAA.0.0.BqjmdJ.AWflr4hjdIsqMBujfYDQjYSQgXQ;',
 ]
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'

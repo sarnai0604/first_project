@@ -26,7 +26,7 @@
     border-radius: 16px;
     padding: 32px;
     width: 100%;
-    max-width: 1350px;
+    max-width: 1250px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.1);
     text-align: center;
     height: fit-content;
@@ -215,9 +215,10 @@
     <textarea
       id="bulk-inp"
       placeholder="Нэг мөрт нэг утга
-zukotoji09
-SpiderManMovieAUS
 100003645830763
+100064320744716
+61559556210474
+61591508921232
 ..."></textarea>
 
     <button
@@ -239,7 +240,7 @@ SpiderManMovieAUS
       <button
         class="copy-all"
         onclick="copyAll(this)">
-        Бүх үр дүнг хуулах (Excel-д зориулсан)
+        Бүх үр дүнг хуулах
       </button>
 
       <table>
@@ -247,60 +248,41 @@ SpiderManMovieAUS
         <thead>
           <tr>
             <th>#</th>
-
-            <th>
-              ID
-              <span class="col-copy" onclick="copyCol('id',this)">copy</span>
-            </th>
-
             <th>
               Username
               <span class="col-copy" onclick="copyCol('username',this)">copy</span>
             </th>
-
             <th>
-              Display Name
-              <span class="col-copy" onclick="copyCol('display_name',this)">copy</span>
+              ID
+              <span class="col-copy" onclick="copyCol('id',this)">copy</span>
             </th>
-
             <th>
               Friends
               <span class="col-copy" onclick="copyCol('friends',this)">copy</span>
             </th>
-
             <th>
               Followers
               <span class="col-copy" onclick="copyCol('followers',this)">copy</span>
             </th>
-
             <th>
               Following
               <span class="col-copy" onclick="copyCol('following',this)">copy</span>
             </th>
-
-            <th>
-              Locked
-              <span class="col-copy" onclick="copyCol('is_closed',this)">copy</span>
-            </th>
-
             <th>
               Gender
               <span class="col-copy" onclick="copyCol('gender',this)">copy</span>
             </th>
-
             <th>
-              Lives In
-              <span class="col-copy" onclick="copyCol('lives_in',this)">copy</span>
+              Locked
+              <span class="col-copy" onclick="copyCol('is_closed',this)">copy</span>
             </th>
-
             <th>
-              From
-              <span class="col-copy" onclick="copyCol('from_place',this)">copy</span>
+              Deleted
+              <span class="col-copy" onclick="copyCol('is_deleted',this)">copy</span>
             </th>
-
             <th>
-              Category
-              <span class="col-copy" onclick="copyCol('category',this)">copy</span>
+              Location
+              <span class="col-copy" onclick="copyCol('location',this)">copy</span>
             </th>
           </tr>
         </thead>
@@ -317,43 +299,91 @@ SpiderManMovieAUS
 
 <script>
 
+/* =========================================================
+   COPY FUNCTIONS
+========================================================= */
+
 function _copyFallback(text) {
   var ta = document.createElement('textarea');
   ta.value = text;
-  ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;opacity:0.01;';
+  ta.style.cssText =
+    'position:fixed;' +
+    'top:0;' +
+    'left:0;' +
+    'width:2px;' +
+    'height:2px;' +
+    'opacity:0.01;';
+
   document.body.appendChild(ta);
   ta.focus();
   ta.select();
   ta.setSelectionRange(0, 99999);
-  try { document.execCommand('copy'); } catch(e) {}
+
+  try {
+    document.execCommand('copy');
+  } catch(e) {}
+
   document.body.removeChild(ta);
 }
 
 function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).catch(function() { _copyFallback(text); });
+    navigator.clipboard
+      .writeText(text)
+      .catch(function() {
+        _copyFallback(text);
+      });
   } else {
     _copyFallback(text);
   }
 }
 
+/* =========================================================
+   VALUE CHECK
+========================================================= */
+
 function hasValue(v) {
-  return v && v !== '0' && v !== 'Олдсонгүй';
+  return v &&
+         v !== '0' &&
+         v !== 'Олдсонгүй';
 }
 
+/* =========================================================
+   GENDER CLASS
+========================================================= */
+
 function genderClass(g) {
-  if (g === 'male') return 'gender-male';
-  if (g === 'female') return 'gender-female';
+  if (g === 'male')
+    return 'gender-male';
+  if (g === 'female')
+    return 'gender-female';
   return 'gender-unknown';
 }
 
+/* =========================================================
+   BULK RESULTS
+========================================================= */
+
 var bulkResults = [];
+
+/* =========================================================
+   BULK SEARCH
+========================================================= */
 
 function searchBulk() {
   var raw = document.getElementById('bulk-inp').value;
-  var lines = raw.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
 
-  if (!lines.length) return;
+  var lines = raw
+    .split('\n')
+    .map(function(s) {
+      return s.trim();
+    })
+    .filter(function(s) {
+      return s.length > 0;
+    });
+
+  if (!lines.length)
+    return;
 
   var btn = document.getElementById('bulk-btn');
   btn.disabled = true;
@@ -369,61 +399,100 @@ function searchBulk() {
 
   fetch('/batch', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items: lines })
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      items: lines
+    })
   })
-  .then(function(r) { return r.json(); })
+  .then(function(r) {
+    return r.json();
+  })
   .then(function(data) {
     var results = data.results || [];
     var tbody = document.getElementById('bulk-tbody');
 
     for (var i = 0; i < lines.length; i++) {
       var r = results[i] || {};
-      var isClosedVal = r.is_closed || '';
-      var genderVal = r.gender || '';
-      var livesInVal = r.lives_in || '';
-      var fromVal = r.from_place || '';
-      var displayNameVal = r.display_name || '';
-      var categoryVal = r.category || '';
-      var idVal = r.id || lines[i];
-      var usernameVal = r.username || '';
 
+      var usernameVal = r.username || '';
+      var idVal = r.id || lines[i];
+      var friendsVal = r.friends || '';
+      var followersVal = r.followers || '';
+      var followingVal = r.following || '';
+      var genderVal = r.gender || '';
+      var isClosedVal = r.is_closed || '';
+      var isDeletedVal = r.is_deleted || '';
+      var locationVal = r.location || '';
+
+      /* Copy хийхэд ашиглах массив (хүссэн дарааллаар) */
       bulkResults.push({
-        id: idVal,
         username: usernameVal,
-        display_name: displayNameVal,
-        friends: r.friends || '',
-        followers: r.followers || '',
-        following: r.following || '',
-        is_closed: isClosedVal,
+        id: idVal,
+        friends: friendsVal,
+        followers: followersVal,
+        following: followingVal,
         gender: genderVal,
-        lives_in: livesInVal,
-        from_place: fromVal,
-        category: categoryVal
+        is_closed: isClosedVal,
+        is_deleted: isDeletedVal,
+        location: locationVal
       });
 
       var tr = document.createElement('tr');
 
       var cells = [
-        { v: String(i + 1), style: 'color:#aaa;font-size:11px' },
-        { v: idVal, style: 'color:#555' },
-        { v: usernameVal, cls: hasValue(usernameVal) ? 'found' : 'notfound' },
-        { v: displayNameVal, cls: hasValue(displayNameVal) ? 'found' : 'notfound' },
-        { v: r.friends || '', cls: hasValue(r.friends) ? 'found' : 'notfound' },
-        { v: r.followers || '', cls: hasValue(r.followers) ? 'found' : 'notfound' },
-        { v: r.following || '', cls: hasValue(r.following) ? 'found' : 'notfound' },
-        { v: isClosedVal, cls: isClosedVal === 'locked' ? 'is-locked' : (isClosedVal === 'open' ? 'is-not-locked' : 'notfound') },
-        { v: genderVal, cls: genderClass(genderVal) },
-        { v: livesInVal, cls: hasValue(livesInVal) ? 'location-val' : 'notfound' },
-        { v: fromVal, cls: hasValue(fromVal) ? 'location-val' : 'notfound' },
-        { v: categoryVal, cls: hasValue(categoryVal) ? 'found' : 'notfound' }
+        {
+          v: String(i + 1),
+          style: 'color:#aaa;font-size:11px'
+        },
+        {
+          v: usernameVal,
+          cls: hasValue(usernameVal) ? 'found' : 'notfound'
+        },
+        {
+          v: idVal,
+          style: 'color:#555'
+        },
+        {
+          v: friendsVal,
+          cls: hasValue(friendsVal) ? 'found' : 'notfound'
+        },
+        {
+          v: followersVal,
+          cls: hasValue(followersVal) ? 'found' : 'notfound'
+        },
+        {
+          v: followingVal,
+          cls: hasValue(followingVal) ? 'found' : 'notfound'
+        },
+        {
+          v: genderVal,
+          cls: genderClass(genderVal)
+        },
+        {
+          v: isClosedVal,
+          cls: isClosedVal === 'locked' ? 'is-locked' : (isClosedVal === 'open' ? 'is-not-locked' : 'notfound')
+        },
+        {
+          v: isDeletedVal,
+          cls: isDeletedVal === 'true' ? 'is-locked' : 'is-not-locked'
+        },
+        {
+          v: locationVal,
+          cls: hasValue(locationVal) ? 'location-val' : 'notfound'
+        }
       ];
 
       cells.forEach(function(c) {
         var td = document.createElement('td');
         td.textContent = c.v || '—';
-        if (c.style) td.setAttribute('style', c.style);
-        if (c.cls) td.className = c.cls;
+        if (c.style) {
+          td.setAttribute('style', c.style);
+        }
+        if (c.cls) {
+          td.className = c.cls;
+        }
         tr.appendChild(td);
       });
 
@@ -442,35 +511,52 @@ function searchBulk() {
   });
 }
 
+/* =========================================================
+   COPY COLUMN
+========================================================= */
+
 function copyCol(key, el) {
-  var text = bulkResults.map(function(x) { return x[key] || ''; }).join('\n');
+  var text = bulkResults
+    .map(function(x) {
+      return x[key] || '';
+    })
+    .join('\n');
+
   copyText(text);
   el.textContent = 'paste';
-  setTimeout(function() { el.textContent = 'copy'; }, 1500);
+  setTimeout(function() {
+    el.textContent = 'copy';
+  }, 1500);
 }
 
+/* =========================================================
+   COPY ALL
+========================================================= */
+
 function copyAll(btn) {
-  var text = bulkResults.map(function(x) {
-    return [
-      x.id,
-      x.username,
-      x.display_name,
-      x.friends,
-      x.followers,
-      x.following,
-      x.is_closed,
-      x.gender,
-      x.lives_in,
-      x.from_place,
-      x.category
-    ].join('\t');
-  }).join('\n');
+  var text = bulkResults
+    .map(function(x) {
+      return [
+        x.username,
+        x.id,
+        x.friends,
+        x.followers,
+        x.following,
+        x.gender,
+        x.is_closed,
+        x.is_deleted,
+        x.location
+      ].join('\t');
+    })
+    .join('\n');
 
   copyText(text);
 
   var orig = btn.textContent;
-  btn.textContent = 'Хуулагдлаа! (Excel руу шууд Paste хийж болно)';
-  setTimeout(function() { btn.textContent = orig; }, 2000);
+  btn.textContent = 'Хуулагдлаа!';
+  setTimeout(function() {
+    btn.textContent = orig;
+  }, 1500);
 }
 
 </script>

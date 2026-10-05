@@ -11,18 +11,19 @@ import os
 app = Flask(__name__, static_folder='static')
 
 COOKIES = [
-    'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100021418158790; xs=38%3ABiHnEBeMmB0_QA%3A2%3A1782359706%3A-1%3A-1%3A%3AAcwXj0JI1_D8bD1gxQC71XroU9EMTnlgqBekFgqXlw; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781682787314%2C%22v%22%3A1%7D; wd=363x794; fr=1qAlNUwIFcukl1o7c.AWeUvFUaOALcq73o5k4nph-PrYlIBdORwcsiJLd_xNf63R01sw0.BqPKaf..AAA.0.0.BqPKaf.AWc2rx0YU_4lilKc1mPrnDr_ER4;',
-    # 'datr=0f4TaniQolJ5C4YoG81CwSqZ; ps_l=1; ps_n=1; c_user=100090316622127; xs=29%3AZzWPlMggEDCuQg%3A2%3A1782359197%3A-1%3A-1%3A%3AAcyGZZyZiVi_LqTlKW9iAblBn2kyBcumbe90bZv-gQ; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1781749955177%2C%22v%22%3A1%7D; wd=363x794; fr=1GMOCPoTpv57x7dkH.AWcyB_2lW7bLCOcaEHYqNEKek3_RRulDyazk_sZZEANZiTdtoMg.BqPKS1..AAA.0.0.BqPKS1.AWfiWmsCrfCwrO3r12erZ-Zv6mA;'
+    #oko
+    'datr=KOO5arE6ayAUWDYT9umPwITQ; ps_l=1; ps_n=1; c_user=61563545111550; '
+    'xs=35%3AtZT35FHzY_uNpg%3A2%3A1790567253%3A-1%3A-1%3A%3AAcyVMKLWq3-N0Nycc8Qm8waQl-mOKnJkVuqW4dDC1Q;'
+    'presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1785127214926%2C%22v%22%3A1%7D; wd=844x911; '
+    'fr=1WfsqsoHdWQCYBUKd.AWdnSvfIQUscId3fwjvbicG59qKJ19ze4oswZ1OwH7qc4h9ntxc.BqueNa..AAA.0.0.BqueNa.AWdlwP9vXSdR6ynSAz3C2nssaTc; ',
 ]
 
-
-
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36'
 
 _cycle = itertools.cycle(COOKIES)
 _cookie_lock = threading.Lock()
 
-_session_pool: list = []
+_session_pool = []
 _session_lock = threading.Lock()
 
 def _new_session():
@@ -53,18 +54,21 @@ def _parse_count(val):
     num = float(m.group(1))
     suffix = m.group(2).upper()
     if suffix == 'K':
-        num *= 1000
+        num = 1000
     elif suffix == 'M':
-        num *= 1000000
+        num = 1000000
     return str(int(num))
 
 def _extract_location(html):
-    m = re.search(r'"text"\s*:\s*\{\s*"text"\s*:\s*"(?:Lives in|From)\s+([^"]+)"', html)
-    if m:
-        return m.group(1).strip()
-    m = re.search(r'"text"\s*:\s*"(?:Lives in|From)\s+([^"]+)"', html)
-    if m:
-        return m.group(1).strip()
+    for pat in [
+        r'"text"\s:\s\{\s*"text"\s*:\s*"(?:Lives in|From)\s+([^"]{2,60})"',
+        r'"text"\s*:\s*"(?:Lives in|From)\s+([^"]{2,60})"',
+    ]:
+        m = re.search(pat, html)
+        if m:
+            loc = m.group(1).strip()
+            if not any(w in loc.lower() for w in ['now on', 'your', 'interaction', 'will be']):
+                return loc
     return ''
 
 def _is_gone(resp):
@@ -76,12 +80,11 @@ def _is_gone(resp):
     return False
 
 def _is_deactivated(text):
-    m = re.search(r'"isAdminViewingDeactivatedProfile"\s*:\s*(\w+)', text)
-    return bool(m and m.group(1) == 'true')
+    return '"isAdminViewingDeactivatedProfile"' in text
 
 def do_lookup(q):
     session = get_session()
-    empty_res   = {"username": "", "id": "", "friends": "", "followers": "", "following": "", "gender": "", "is_closed": "", "is_deleted": "", "location": ""}
+    empty_res  = {"username": "", "id": "", "friends": "", "followers": "", "following": "", "gender": "", "is_closed": "", "is_deleted": "", "location": ""}
     deleted_res = {"username": "", "id": "", "friends": "", "followers": "", "following": "", "gender": "", "is_closed": "", "is_deleted": "-", "location": ""}
 
     try:
@@ -92,7 +95,7 @@ def do_lookup(q):
             resp = session.get(
                 f'https://www.facebook.com/{q}',
                 headers=headers,
-                timeout=20,
+                timeout=40,
                 allow_redirects=True
             )
             final_url = resp.url.rstrip('/').split('?')[0].split('#')[0]
@@ -119,9 +122,8 @@ def do_lookup(q):
         if _is_gone(resp) or _is_deactivated(html_content):
             return deleted_res
 
-        friends = followers = following = ''
-
         profile_valid = bool(fb_id)
+        friends = followers = following = gender = ''
 
         if profile_valid:
             # Friends
@@ -140,25 +142,16 @@ def do_lookup(q):
                 m_following = re.search(r'([\d.,KkMm]+)\s*<\/strong>\s*(?:following|дагаж)', html_content, re.IGNORECASE)
                 if not m_following:
                     m_following = re.search(r'([\d.,KkMm]+)\s*(?:following|дагаж)', html_content, re.IGNORECASE)
-                if m_following:
-                    following = m_following.group(1).strip()
+                    if m_following:
+                        following = m_following.group(1).strip()
 
-        # Gender
-        gender = ''
-        if profile_valid:
-            m_gender = re.search(r'"\s*,\s*"gender"\s*:\s*"?(\w+)"?', html_content)
-            if m_gender:
-                raw = m_gender.group(1).lower()
-                if raw == 'male':
-                    gender = 'male'
-                elif raw == 'female':
-                    gender = 'female'
-                elif raw == 'neuter':
-                    gender = 'neuter'
-                elif raw == 'unknown':
-                    gender = 'unknown'
+            mg = re.search(r'"\s*,\s*"gender"\s*:\s*"?(\w+)"?', html_content)
+            if mg:
+                raw = mg.group(1).lower()
+                if raw in ('male', 'female', 'neuter'):
+                    gender = raw
 
-        # Locked / Open
+        # Locked / Open               
         if ('"LockedProfileTryItBanner"' in html_content
                 or 'locked her profile' in html_content
                 or 'locked his profile' in html_content
@@ -184,14 +177,14 @@ def do_lookup(q):
         return result
 
     except Exception as e:
-        print("LOOKUP ERROR:", e)
+        print("LOOKUP ERROR:", str(e).split('See https://')[0].strip())
         return empty_res
     finally:
         release_session(session)
 
 @app.route('/')
 def index():
-    return send_from_directory('static', 'index1.html')
+    return send_from_directory('static', 'index.html')
 
 @app.route('/batch', methods=['POST'])
 def batch():
@@ -217,4 +210,4 @@ def lookup():
 
 if __name__ == '__main__':
     os.makedirs('static', exist_ok=True)
-    app.run(host='0.0.0.0', port=8080, debug=True, threaded=True)
+    app.run(host='0.0.0.0', port=8000, debug=True, threaded=True)
